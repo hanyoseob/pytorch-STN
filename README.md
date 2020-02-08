@@ -119,6 +119,11 @@ After the above comment executes, go **http://localhost:6006**
 
     pytorch-STN
     +---checkpoints
+    |   \---cls
+    |   |   \---mnist
+    |   |       +---model_epoch00001.pth
+    |   |       |   ...
+    |   |       \---model_epoch0010.pth
     |   \---stn
     |       \---mnist
     |           +---model_epoch00001.pth
