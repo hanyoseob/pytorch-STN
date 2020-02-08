@@ -331,15 +331,20 @@ class Train:
             # for i, data in enumerate(loader_train, 1):
             for i, (input, label) in enumerate(loader_test, 1):
 
-                input = input.to(device)
-                label = label.to(device)
 
                 # forward netG
-                input_stn = net_STN(input)
-                output = net_CLS(input_stn)
-                pred = output.max(1, keepdim=True)[1]
+                if self.scope == 'stn':
+                    input_stn = net_STN(input)
+                    output = net_CLS(input_stn)
+                    pred = output.max(1, keepdim=True)[1]
 
-                loss_CLS = fn_CLS(output, label)
+                    loss_CLS = fn_CLS(output, label)
+
+                elif self.scope == 'cls':
+                    output = net_CLS(input)
+                    pred = output.max(1, keepdim=True)[1]
+
+                    loss_CLS = fn_CLS(output, label)
 
                 # get losses
                 loss_CLS_test += [loss_CLS.item()]
@@ -348,21 +353,22 @@ class Train:
                 print('TEST: BATCH %04d/%04d: CLS: %.4f ACC: %.4f' % (i, num_batch_test, mean(loss_CLS_test), 100 * mean(pred_CLS_test)))
 
                 ## show output
-                input = transform_inv(input)
-                input_stn = transform_inv(input_stn)
+                if self.scope == 'stn':
+                    input = transform_inv(input)
+                    input_stn = transform_inv(input_stn)
 
-                for j in range(input.shape[0]):
-                    name = batch_size * (i - 1) + j
-                    fileset = {'name': name,
-                               'input': "%04d-input.png" % name,
-                               'input_stn': "%04d-input_stn.png" % name}
+                    for j in range(input.shape[0]):
+                        name = batch_size * (i - 1) + j
+                        fileset = {'name': name,
+                                   'input': "%04d-input.png" % name,
+                                   'input_stn': "%04d-input_stn.png" % name}
 
-                    if nch_in == 3:
-                        plt.imsave(os.path.join(dir_result_save, fileset['input']), input[j, :, :, :].squeeze())
-                        plt.imsave(os.path.join(dir_result_save, fileset['input_stn']), input_stn[j, :, :, :].squeeze())
-                    elif nch_in == 1:
-                        plt.imsave(os.path.join(dir_result_save, fileset['input']), input[j, :, :, :].squeeze(), cmap='gray')
-                        plt.imsave(os.path.join(dir_result_save, fileset['input_stn']), input_stn[j, :, :, :].squeeze(), cmap='gray')
+                        if nch_in == 3:
+                            plt.imsave(os.path.join(dir_result_save, fileset['input']), input[j, :, :, :].squeeze())
+                            plt.imsave(os.path.join(dir_result_save, fileset['input_stn']), input_stn[j, :, :, :].squeeze())
+                        elif nch_in == 1:
+                            plt.imsave(os.path.join(dir_result_save, fileset['input']), input[j, :, :, :].squeeze(), cmap='gray')
+                            plt.imsave(os.path.join(dir_result_save, fileset['input_stn']), input_stn[j, :, :, :].squeeze(), cmap='gray')
 
                     append_index(dir_result, fileset)
 
